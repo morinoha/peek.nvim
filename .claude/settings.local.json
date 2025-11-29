@@ -2,7 +2,16 @@
   "permissions": {
     "allow": [
       "Bash(jj log:*)",
-      "Bash(jj describe:*)"
+      "Bash(jj describe:*)",
+      "Bash(jj bookmark:*)",
+      "mcp__chrome-devtools__list_pages",
+      "mcp__chrome-devtools__take_screenshot",
+      "mcp__chrome-devtools__navigate_page",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_screenshot",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_evaluate",
+      "Bash(deno task build:*)"
     ],
     "deny": [],
     "ask": []
