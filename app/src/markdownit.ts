@@ -99,16 +99,14 @@ md.renderer.rules.math_block_eqno = (() => {
 md.renderer.rules.fence = (() => {
   const fence = md.renderer.rules.fence!;
   const escapeHtml = md.utils.escapeHtml;
-  const regex = new RegExp(
-    /^(?<frontmatter>---[\s\S]+---)?\s*(?<content>(?<charttype>flowchart|sequenceDiagram|gantt|classDiagram|stateDiagram|pie|journey|C4Context|erDiagram|requirementDiagram|gitGraph)[\s\S]+)/,
-  );
 
   return (tokens, idx, options, env, self) => {
     const token = tokens[idx];
+    const info = token.info.trim().toLowerCase();
     const content = token.content.trim();
 
-    if (regex.test(content)) {
-      const match = regex.exec(content);
+    // Check if the code block is marked as mermaid
+    if (info === 'mermaid') {
       return `
         <div
           class="peek-mermaid-container"
@@ -117,7 +115,7 @@ md.renderer.rules.fence = (() => {
           <div
             id="graph-mermaid-${env.genId(hashCode(content))}"
             data-graph="mermaid"
-            data-graph-definition="${escapeHtml(match?.groups?.content || '')}"
+            data-graph-definition="${escapeHtml(content)}"
           >
             <div class="peek-loader"></div>
           </div>
