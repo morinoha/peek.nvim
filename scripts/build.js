@@ -74,6 +74,11 @@ const result = await Promise.allSettled([
   ),
 
   download(
+    'https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.2/dist/svg-pan-zoom.min.js',
+    'public/svg-pan-zoom.min.js',
+  ),
+
+  download(
     'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css',
     'public/katex.min.css',
   ),

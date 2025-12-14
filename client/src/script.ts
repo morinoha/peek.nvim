@@ -5,7 +5,8 @@ import morphdom from 'https://esm.sh/morphdom@2.7.2?no-dts';
 import mermaid from './mermaid.ts';
 
 const window = globalThis;
-// const _log = Reflect.get(window, '_log');
+
+declare const svgPanZoom: any;
 
 addEventListener('DOMContentLoaded', () => {
   const body = document.body;
@@ -262,4 +263,101 @@ addEventListener('DOMContentLoaded', () => {
       window.scroll({ top: offsetBegin + scrollPix - window.innerHeight / 2 + pixPerLine / 2 });
     };
   })();
+
+  // Mermaid zoom modal
+  const mermaidModal = document.getElementById('peek-mermaid-modal') as HTMLDivElement;
+  const modalOverlay = mermaidModal.querySelector('.peek-mermaid-modal-overlay') as HTMLDivElement;
+  const modalClose = mermaidModal.querySelector('.peek-mermaid-modal-close') as HTMLButtonElement;
+  const modalContainer = mermaidModal.querySelector('.peek-mermaid-modal-container') as HTMLDivElement;
+  let panZoomInstance: any = null;
+
+  let modalKeydownHandler: ((event: KeyboardEvent) => void) | null = null;
+
+  function openMermaidModal(svgElement: SVGElement) {
+    const clonedSvg = svgElement.cloneNode(true) as SVGElement;
+    modalContainer.innerHTML = '';
+    modalContainer.appendChild(clonedSvg);
+    mermaidModal.classList.remove('hidden');
+
+    setTimeout(() => {
+      clonedSvg.removeAttribute('width');
+      clonedSvg.removeAttribute('height');
+      clonedSvg.style.width = '100%';
+      clonedSvg.style.height = '100%';
+
+      panZoomInstance = svgPanZoom(clonedSvg, {
+        zoomEnabled: true,
+        controlIconsEnabled: false,
+        fit: false,
+        contain: false,
+        center: true,
+        minZoom: 0.1,
+        maxZoom: 20,
+        zoomScaleSensitivity: 0.3,
+      });
+
+      modalKeydownHandler = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          event.stopPropagation();
+          closeMermaidModal();
+          return;
+        }
+
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          if (!panZoomInstance) return;
+
+          const panStep = 50;
+          switch (event.key) {
+            case 'ArrowUp':
+              panZoomInstance.panBy({ x: 0, y: panStep });
+              break;
+            case 'ArrowDown':
+              panZoomInstance.panBy({ x: 0, y: -panStep });
+              break;
+            case 'ArrowLeft':
+              panZoomInstance.panBy({ x: panStep, y: 0 });
+              break;
+            case 'ArrowRight':
+              panZoomInstance.panBy({ x: -panStep, y: 0 });
+              break;
+          }
+        }
+      };
+
+      document.addEventListener('keydown', modalKeydownHandler);
+    }, 50);
+  }
+
+  function closeMermaidModal() {
+    if (panZoomInstance) {
+      panZoomInstance.destroy();
+      panZoomInstance = null;
+    }
+    if (modalKeydownHandler) {
+      document.removeEventListener('keydown', modalKeydownHandler);
+      modalKeydownHandler = null;
+    }
+    mermaidModal.classList.add('hidden');
+    modalContainer.innerHTML = '';
+  }
+
+  modalOverlay.addEventListener('click', closeMermaidModal);
+  modalClose.addEventListener('click', closeMermaidModal);
+
+  markdownBody.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement;
+    const mermaidContainer = target.closest('.peek-mermaid-container');
+
+    if (mermaidContainer) {
+      const svg = mermaidContainer.querySelector('svg');
+      if (svg) {
+        event.preventDefault();
+        openMermaidModal(svg);
+      }
+    }
+  });
 });
