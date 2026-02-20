@@ -79,18 +79,24 @@ body::-webkit-scrollbar-thumb {
 
   /* SVG・Mermaidダイアグラムの改ページ対策 */
   svg, .peek-mermaid-container {
-    page-break-inside: avoid;
-    break-inside: avoid;
-    max-height: 90vh;
-    width: auto !important;
-    height: auto !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-before: auto;
+    page-break-after: auto;
+    display: block;
   }
 
-  /* 大きなSVGは縮小して1ページに収める */
+  /* Mermaidダイアグラムを1ページに収める */
+  .peek-mermaid-container {
+    max-height: 250mm; /* A4横の高さに収まるよう制限 */
+    overflow: visible;
+  }
+
   .peek-mermaid-container svg {
     max-width: 100%;
-    max-height: 85vh;
-    object-fit: contain;
+    max-height: 240mm;
+    width: auto !important;
+    height: auto !important;
   }
 
   /* 不要な要素を非表示 */
