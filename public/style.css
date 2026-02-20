@@ -54,6 +54,27 @@ body::-webkit-scrollbar-thumb {
 
   pre, code, table, figure, img {
     page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* 画像の改ページ対策を強化 */
+  img {
+    max-height: 90vh; /* 画像が1ページに収まるよう制限 */
+    width: auto;
+    height: auto;
+    display: block;
+  }
+
+  /* 画像を含む段落も分割しない */
+  p:has(img), .markdown-body > p {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* リスト項目も分割しない */
+  li {
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 
   /* 不要な要素を非表示 */
