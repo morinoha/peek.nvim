@@ -46,14 +46,38 @@
   (function() {
     let printStyleEl = null;
 
-    function updatePrintStyle(mode) {
+    async function updatePrintStyle(mode) {
       if (printStyleEl) printStyleEl.remove();
       printStyleEl = document.createElement('style');
 
       let pageSize;
       if (mode === 'digital') {
-        const height = Math.ceil(document.documentElement.scrollHeight * 0.265) + 30;
-        pageSize = `210mm ${height}mm`;
+        // 印刷幅(210mm - margin 30mm = 180mm ≒ 680px)でのコンテンツ高さを計測
+        const iframe = document.createElement('iframe');
+        iframe.style.cssText = 'position:fixed;left:-9999px;width:680px;height:0;border:none;visibility:hidden;';
+        document.body.appendChild(iframe);
+        const doc = iframe.contentDocument;
+        // スタイルシートをコピー
+        Array.from(document.styleSheets).forEach(function(sheet) {
+          try {
+            if (sheet.href) {
+              const link = doc.createElement('link');
+              link.rel = 'stylesheet';
+              link.href = sheet.href;
+              doc.head.appendChild(link);
+            }
+          } catch(e) {}
+        });
+        const container = doc.createElement('div');
+        container.className = 'markdown-body';
+        container.style.cssText = 'padding:0;margin:0;max-width:none;';
+        container.innerHTML = document.getElementById('peek-markdown-body').innerHTML;
+        doc.body.appendChild(container);
+        // レンダリング待ち
+        await new Promise(function(r) { setTimeout(r, 100); });
+        const heightMm = Math.ceil(doc.body.scrollHeight * 0.265) + 40;
+        document.body.removeChild(iframe);
+        pageSize = '210mm ' + heightMm + 'mm';
       } else if (mode === 'a4-portrait') {
         pageSize = 'A4 portrait';
       } else {
@@ -68,8 +92,8 @@
       updatePrintStyle(this.value);
     });
 
-    document.getElementById('peek-print-btn').addEventListener('click', function() {
-      updatePrintStyle(document.getElementById('peek-print-mode').value);
+    document.getElementById('peek-print-btn').addEventListener('click', async function() {
+      await updatePrintStyle(document.getElementById('peek-print-mode').value);
       setTimeout(function() { window.print(); }, 100);
     });
 
