@@ -101,7 +101,8 @@ body::-webkit-scrollbar-thumb {
 
   /* 不要な要素を非表示 */
   .peek-loader,
-  #peek-zoom-label {
+  #peek-zoom-label,
+  #peek-print-toolbar {
     display: none !important;
   }
 
